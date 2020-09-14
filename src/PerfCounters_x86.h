@@ -74,6 +74,8 @@ static CpuMicroarch compute_cpu_microarch() {
 	return IntelCometlake;
     case 0x30f00:
       return AMDF15R30;
+    case 0x30f10: // AMD Ryzen Threadripper 3970X
+      return AMDRyzen2;
     case 0x00f10:
       if (ext_family == 8) {
         if (!Flags::get().suppress_environment_warnings) {

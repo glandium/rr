@@ -69,6 +69,7 @@ enum CpuMicroarch {
   IntelIcelake,
   AMDF15R30,
   AMDRyzen,
+  AMDRyzen2,
   ARMNeoverseN1
 };
 
@@ -139,12 +140,13 @@ static const PmuConfig pmu_configs[] = {
   { AMDF15R30, "AMD Family 15h Revision 30h", 0xc4, 0xc6, 0, 0, 250,
     PMU_TICKS_TAKEN_BRANCHES | PMU_SKIP_INTEL_BUG_CHECK },
   { AMDRyzen, "AMD Ryzen", 0x5100d1, 0, 0, 0, 1000, PMU_TICKS_RCB },
+  { AMDRyzen2, "AMD Ryzen 2", 0xd1, 0, 0x2c, 0, 10000, PMU_TICKS_RCB | PMU_SKIP_INTEL_BUG_CHECK },
   // 0x21 == BR_RETIRED - Architecturally retired taken branches
   // 0x6F == STREX_SPEC - Speculatively executed strex instructions
   { ARMNeoverseN1, "ARM Neoverse N1", 0x21, 0, 0, 0x6F, 1000, PMU_TICKS_TAKEN_BRANCHES }
 };
 
-#define RR_SKID_MAX 1000
+#define RR_SKID_MAX 10000
 
 static string lowercase(const string& s) {
   string c = s;
@@ -455,7 +457,7 @@ void PerfCounters::reset(Ticks ticks_period) {
       fd_minus_ticks_measure = start_counter(tid, fd_ticks_interrupt, &minus_attr);
     }
 
-    if (!only_one_counter && !running_under_rr()) {
+    if (!only_one_counter && supports_txcp) {
       reset_arch_extras<NativeArch>();
     }
 
